@@ -1,0 +1,17 @@
+db_connection:
+  user: <USER>
+  pass: <PASSWORD>
+  host: xxx.xxx.xxx.xxx
+  port: "1521"
+  service_name: servcename
+  fetch_rows: 100
+schemas:
+  - KNG
+skips:
+  sort:
+  tables:
+special_column_types:
+  - BLOB
+replacements:
+  table_name: "::TABLE_NAME::"
+  schema: "::SCHEMA::"
