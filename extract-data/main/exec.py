@@ -53,7 +53,7 @@ def prepare_columns(target_tables, cursor, sql, cnf, schema):
         for row in data_result:
             target_table = target_columns.get(row[0])
             if target_table is not None:
-                target_tables.append((row[1], row[2], row[3]))
+                target_table.append((row[1], row[2], row[3]))
     return target_columns
 
 
@@ -62,7 +62,7 @@ def write_csv(sql, cursor, output, fetch_rows, schema, table, has_special_column
     csv_header = [s[0] for s in cursor.description]
     out_file_name = output + '/' + schema + '_' + table + '.csv'
     with codecs.open(out_file_name, 'w', 'utf-8') as f:
-        writer = csv.writer(f, lineterminator='/r/n', quoting=csv.QUOTE_ALL)
+        writer = csv.writer(f, lineterminator='\r\n', quoting=csv.QUOTE_ALL)
         writer.writerow(csv_header)
         while 1:
             csv_detail = cursor.fetchmany(fetch_rows)
