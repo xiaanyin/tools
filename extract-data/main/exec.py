@@ -28,7 +28,7 @@ def prepare_output_folder():
 def prepare_target_tables(cursor, sql, cnf, schema):
     sql_replacement = "'" + schema + "'"
     sql = sql.replace(cnf.get('replacements').get('schema'), sql_replacement)
-    cursor.exec(sql)
+    cursor.execute(sql)
     target_tables = []
     fetch_rows = cnf.get('db_connection').get('fetch_rows')
     while True:
@@ -40,8 +40,8 @@ def prepare_target_tables(cursor, sql, cnf, schema):
     return target_tables
 
 
-def prepare_columns(target_talbes, cursor, sql, cnf, schema):
-    target_columns = dict((table, []) for table in target_talbes)
+def prepare_columns(target_tables, cursor, sql, cnf, schema):
+    target_columns = dict((table, []) for table in target_tables)
     fetch_rows = int(cnf.get('db_connection').get('fetch_rows'))
     sql_replacement = "'" + schema + "'"
     sql = sql.replace(cnf.get('replacements').get('schema'), sql_replacement)
@@ -51,9 +51,9 @@ def prepare_columns(target_talbes, cursor, sql, cnf, schema):
         if len(data_result) == 0:
             break
         for row in data_result:
-            target_talbe = target_columns.get(row[0])
-            if target_talbe is not None:
-                target_talbes.append((row[1], row[2], row[3]))
+            target_table = target_columns.get(row[0])
+            if target_table is not None:
+                target_tables.append((row[1], row[2], row[3]))
     return target_columns
 
 
@@ -62,7 +62,7 @@ def write_csv(sql, cursor, output, fetch_rows, schema, table, has_special_column
     csv_header = [s[0] for s in cursor.description]
     out_file_name = output + '/' + schema + '_' + table + '.csv'
     with codecs.open(out_file_name, 'w', 'utf-8') as f:
-        writer = csv.writer(f, lienterminator='¥r¥n', quoting=csv.QUOTE_ALL)
+        writer = csv.writer(f, lineterminator='/r/n', quoting=csv.QUOTE_ALL)
         writer.writerow(csv_header)
         while 1:
             csv_detail = cursor.fetchmany(fetch_rows)
@@ -112,9 +112,9 @@ def prepare_single_table_fetch_sql(schema, table, target_columns, special_column
     sort = ''
     if len(key_columns) > 0:
         sort = 'ORDER BY ' + ','.join(key_columns)
-    fetch_target_infomation = get_fetch_target_columns(target_table_columns, special_column_types)
-    sql = "SELECT {} FROM {}.{} {}".format(fetch_target_infomation[0], schema, table, sort)
-    return sql, fetch_target_infomation[1]
+    fetch_target_information = get_fetch_target_columns(target_table_columns, special_column_types)
+    sql = "SELECT {} FROM {}.{} {}".format(fetch_target_information[0], schema, table, sort)
+    return sql, fetch_target_information[1]
 
 
 def process_schema(cursor, cnf, schema, output, fetch_rows):
@@ -124,7 +124,7 @@ def process_schema(cursor, cnf, schema, output, fetch_rows):
     target_columns = prepare_columns(target_tables, cursor, sql, cnf, schema)
     special_column_types = cnf.get('special_column_types')
     for table in target_tables:
-        if table.startwith(tuple(cnf.get('skips').get('tables'))):
+        if table.startswith(tuple(cnf.get('skips').get('tables'))):
             continue
         ret = prepare_single_table_fetch_sql(schema, table, target_columns, special_column_types)
         print(ret[0])
